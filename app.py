@@ -112,7 +112,7 @@ def update_graphs(player):
             autorange=True,
             showgrid=True,
             zeroline=True,
-            dtick=25,
+            dtick=.05,
             gridcolor='white',
             gridwidth=1,
             zerolinecolor='rgb(255, 255, 255)',

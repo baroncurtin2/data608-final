@@ -78,7 +78,7 @@ def update_graphs(player):
         # field goal traces
         traces_fg.append(
             go.Box(
-                y=data_[f'FGA: {d}'].to_numpy(),
+                y=data_[f'FG_PCT: {d}'].to_numpy(),
                 name=d,
                 # boxpoints='all',
                 jitter=0.5,

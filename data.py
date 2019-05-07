@@ -10,7 +10,7 @@ class NBAData:
     def __get_data(self):
         # Basic Request
         shot_locations = LeagueDashPlayerShotLocations(distance_range='5ft Range')
-        data = shot_locations.data_sets[0].data['data']
+        nba_data = shot_locations.data_sets[0].data['data']
 
         # fix headers
         distances = shot_locations.data_sets[0].data['headers'][0]['columnNames']
@@ -23,11 +23,16 @@ class NBAData:
         headers = [*headers[:5], *distances]
 
         # create dataframe
-        data = pd.DataFrame(data, columns=headers)
+        nba_data = pd.DataFrame(nba_data, columns=headers)
 
         # drop unneeded columns
-        data.drop(['PLAYER_ID', 'TEAM_ID'], inplace=True, axis=1)
-        return data
+        nba_data.drop(['PLAYER_ID', 'TEAM_ID'], inplace=True, axis=1)
+
+        # create expected points per 10 shots
+        for d in self.distances:
+            nba_data[f'PP10: {d}'] = nba_data[f'FG_PCT: {d}'] * 10
+
+        return nba_data
 
     @property
     def player_names(self):
@@ -41,16 +46,46 @@ class NBAData:
     def distances(self):
         return self.__distances
 
-    def attempts_check(self, player, distance):
-        to_check = self.data[self.data[f'FGA: {distance}'] > 25]
-        players_list = ('\n'.join(to_check['PLAYER_NAME'].str.lower().to_list()))
-        return player.lower() in players_list
+    @property
+    def mid_range_distances(self):
+        return self.distances[2:5]
 
-    def player_lookup(self, player):
-        to_check = self.data[self.data['PLAYER_NAME'].str.contains(player, case=False)]
-        return to_check
+    def __set_index(self, col_name):
+        return self.data.set_index([col_name])
+
+    def __find_cols(self, col_part):
+        return [c for c in self.data.columns if col_part in c]
+
+    @property
+    def mid_range_data(self):
+        ds = self.distances[2:5]
+        my_data = self.__set_index('PLAYER_NAME')
+        cols = [c for c in my_data.columns
+                for d in ds
+                if d in c]
+        return my_data[cols].reset_index()
+
+    @property
+    def field_goal_percentages(self):
+        cols = self.__find_cols('FG_PCT')
+        my_data = self.__set_index('PLAYER_NAME')
+        return my_data[cols]
+
+    @property
+    def points_per_ten_shots(self):
+        cols = self.__find_cols('PP10')
+        my_data = self.__set_index('PLAYER_NAME')
+        return my_data[cols]
+
+    @property
+    def field_goal_attempts(self):
+        cols = self.__find_cols('FGA')
+        my_data = self.__set_index('PLAYER_NAME')
+        return my_data[cols]
 
 
 if __name__ == '__main__':
     nba = NBAData()
-    data = nba.data.set_index('PLAYER_NAME')
+    print(nba.distances)
+    print(nba.mid_range_data.columns)
+    print(nba.mid_range_data.head())

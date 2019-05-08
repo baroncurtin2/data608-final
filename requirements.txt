@@ -1,0 +1,7 @@
+pandas==0.24.2
+numpy==1.16.3
+plotly==3.8.1
+dash_core_components==0.47.0
+dash==0.42.0
+nba_api==1.1.4
+dash_html_components==0.16.0

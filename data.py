@@ -86,6 +86,4 @@ class NBAData:
 
 if __name__ == '__main__':
     nba = NBAData()
-    print(nba.distances)
-    print(nba.mid_range_data.columns)
-    print(nba.mid_range_data.head())
+    print(nba.mid_range_distances)

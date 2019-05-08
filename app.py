@@ -18,7 +18,13 @@ MIN_ATTEMPTS = 50
 nba = NBAData()
 data = nba.mid_range_data
 distances = nba.mid_range_distances
-players = [{'label': p, 'value': p} for p in nba.player_names]
+
+# filter data FGA for minimum attempts
+for c in [col for col in data.columns if 'FGA' in col]:
+    data = data[data[c] >= MIN_ATTEMPTS]
+
+# get player names
+players = [{'label': p, 'value': p} for p in data['PLAYER_NAME'].unique()]
 
 # dash setup
 external_stylesheets = ['https://codepen.io/chriddyp/pen/bWLwgP.css']
@@ -27,7 +33,7 @@ server = app.server
 
 # dash layout
 app.layout = html.Div(children=[
-    html.H1('NBA Best Mid-Range Shooters'),
+    html.H1('NBA Best Mid-Range Shooters (Min. 50 FGA)'),
 
     html.Div(children=[
         html.H5('Player Name'),
@@ -56,6 +62,9 @@ app.layout = html.Div(children=[
 def update_graphs(player):
     # copy data for encapsulation
     my_data = data.copy().set_index('PLAYER_NAME')
+    player_data = my_data.loc[[player]]
+    fg_cols = [f'FG_PCT: {d}' for d in distances]
+    pp10_cols = [f'PP10: {d}' for d in distances]
 
     # base trace lists
     traces_fg = []
@@ -66,6 +75,58 @@ def update_graphs(player):
         'fg': '2018-2019 NBA Mid-Range FG%',
         'pp10': '2018-2019 NBA Expected Point / 10 Shots',
     }
+
+    # player specific line charts
+    traces_fg.append(
+        go.Scatter(
+            x=distances,
+            y=player_data.loc[player][fg_cols].values.tolist(),
+            name=player,
+            mode='lines'
+        )
+    )
+    traces_pp10.append(
+        go.Scatter(
+            x=distances,
+            y=player_data.loc[player][pp10_cols].values.tolist(),
+            name=player,
+            mode='lines'
+        )
+    )
+
+    # average and max line charts
+    traces_fg.append(
+        go.Scatter(
+            x=distances,
+            y=my_data[fg_cols].max().values.tolist(),
+            name='Best FG%',
+            mode='lines'
+        )
+    )
+    traces_fg.append(
+        go.Scatter(
+            x=distances,
+            y=my_data[fg_cols].mean().values.tolist(),
+            name='Average FG%',
+            mode='lines'
+        )
+    )
+    traces_pp10.append(
+        go.Scatter(
+            x=distances,
+            y=my_data[pp10_cols].max().values.tolist(),
+            name='Best PP10',
+            mode='lines'
+        )
+    )
+    traces_pp10.append(
+        go.Scatter(
+            x=distances,
+            y=my_data[pp10_cols].mean().values.tolist(),
+            name='Average PP10',
+            mode='lines'
+        )
+    )
 
     # generate colors
     colors = [f'hsl({str(h)}, 50%, 50%)' for h in np.linspace(0, 200, len(distances))]
@@ -106,6 +167,7 @@ def update_graphs(player):
                 line=dict(width=1)
             )
         )
+
     layout_fg = go.Layout(
         title=titles['fg'],
         yaxis=dict(

@@ -21,7 +21,7 @@ class NBAData:
         }
 
         # Basic Request
-        shot_locations = LeagueDashPlayerShotLocations(distance_range='5ft Range', headers=custom_headers)
+        shot_locations = LeagueDashPlayerShotLocations(distance_range='5ft Range', headers=custom_headers, timeout=15000)
         nba_data = shot_locations.data_sets[0].data['data']
 
         # fix headers

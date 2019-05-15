@@ -106,8 +106,8 @@ def update_graphs(player):
     traces_fg.append(
         go.Scatter(
             x=distances,
-            y=my_data[fg_cols].mean().values.tolist(),
-            name='Average FG%',
+            y=[.4 for _ in distances],
+            name='Minimum Threshold FG%',
             mode='lines'
         )
     )
@@ -122,8 +122,8 @@ def update_graphs(player):
     traces_pp10.append(
         go.Scatter(
             x=distances,
-            y=my_data[pp10_cols].mean().values.tolist(),
-            name='Average PP10',
+            y=[8 for _ in distances],
+            name='Minimum Threshold PP10',
             mode='lines'
         )
     )
@@ -177,6 +177,7 @@ def update_graphs(player):
             dtick=.05,
             gridcolor='white',
             gridwidth=1,
+            tickformat='%',
             zerolinecolor='rgb(255, 255, 255)',
             zerolinewidth=2,
         ),

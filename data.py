@@ -42,7 +42,7 @@ class NBAData:
 
         # create expected points per 10 shots
         for d in self.distances:
-            nba_data[f'PP10: {d}'] = nba_data[f'FG_PCT: {d}'] * 10
+            nba_data[f'PP10: {d}'] = nba_data[f'FG_PCT: {d}'] * 10 * 2
 
         return nba_data
 
